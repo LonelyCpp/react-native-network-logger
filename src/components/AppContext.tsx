@@ -1,5 +1,5 @@
 import React, { Dispatch, useContext, useReducer } from 'react';
-import NetworkRequestInfo from 'src/NetworkRequestInfo';
+import NetworkRequestInfo from '../NetworkRequestInfo';
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD';
 
