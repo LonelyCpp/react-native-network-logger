@@ -46,9 +46,11 @@ const themedStyles = (theme: Theme) =>
   StyleSheet.create({
     button: {
       color: theme.colors.link,
-      fontSize: 18,
+      fontSize: 14,
       padding: 10,
       alignSelf: 'flex-start',
+      borderRadius: 8,
+      backgroundColor: theme.colors.card,
     },
     fullWidth: {
       alignSelf: 'center',

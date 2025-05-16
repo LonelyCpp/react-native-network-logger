@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import NetworkRequestInfo from '../NetworkRequestInfo';
-import { useThemedStyles, Theme, useTheme } from '../theme';
+import { useThemedStyles, Theme } from '../theme';
 import { backHandlerSet } from '../backHandler';
 import ResultItem from './ResultItem';
 import Header from './Header';
@@ -25,7 +25,6 @@ interface Props {
 const RequestDetails: React.FC<Props> = ({ request, onClose }) => {
   const [responseBody, setResponseBody] = useState('Loading...');
   const styles = useThemedStyles(themedStyles);
-  const theme = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
 
   const [selectedTab, setSelectedTab] = useState<
@@ -59,45 +58,31 @@ const RequestDetails: React.FC<Props> = ({ request, onClose }) => {
 
   return (
     <View style={styles.container}>
-      <ResultItem
-        request={request}
-        style={styles.info}
-        numberOfLines={5}
-        onPress={() => {
-          setModalVisible(true);
-        }}
-      />
-
-      <View
-        style={{
-          paddingBottom: 4,
-          flexDirection: 'row',
-          borderBottomWidth: 1,
-          borderBottomColor: theme.colors.card,
-        }}
-      >
-        <TouchableOpacity
-          style={styles.tabHeader}
-          onPress={() => Share.share({ message: request.curlRequest })}
-        >
-          <ThemedText>Share cURL</ThemedText>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.tabHeader}
-          onPress={() => Share.share({ message: getFullRequest() })}
-        >
-          <ThemedText>Share full request</ThemedText>
-        </TouchableOpacity>
+      <View style={{ flexDirection: 'row' }}>
+        <View style={{ flex: 1 }}>
+          <ResultItem
+            request={request}
+            style={styles.info}
+            numberOfLines={5}
+            onPress={() => {
+              setModalVisible(true);
+            }}
+          />
+        </View>
       </View>
 
-      <View
-        style={{
-          paddingBottom: 4,
-          flexDirection: 'row',
-          borderBottomWidth: 1,
-          borderBottomColor: theme.colors.card,
-        }}
-      >
+      <View style={styles.buttonContainer}>
+        {!backHandlerSet() && <Button onPress={onClose}>Close</Button>}
+
+        <Button onPress={() => Share.share({ message: request.curlRequest })}>
+          Share cURL
+        </Button>
+        <Button onPress={() => Share.share({ message: getFullRequest() })}>
+          Share full request
+        </Button>
+      </View>
+
+      <View style={styles.tabButtonContainer}>
         <TouchableOpacity
           style={[
             styles.tabHeader,
@@ -179,15 +164,11 @@ const RequestDetails: React.FC<Props> = ({ request, onClose }) => {
           </>
         )}
       </ScrollView>
-      {!backHandlerSet() && (
-        <Button onPress={onClose} style={styles.close}>
-          Close
-        </Button>
-      )}
+
       <NLModal visible={modalVisible} onClose={() => setModalVisible(false)}>
-        <View style={{ maxHeight: 300 }}>
+        <View style={styles.urlModalContainer}>
           <ScrollView>
-            <ThemedText style={{ fontSize: 12 }}>{request.url}</ThemedText>
+            <ThemedText style={styles.urlModalText}>{request.url}</ThemedText>
           </ScrollView>
         </View>
       </NLModal>
@@ -214,11 +195,6 @@ const themedStyles = (theme: Theme) =>
     info: {
       margin: 0,
     },
-    close: {
-      position: 'absolute',
-      right: 10,
-      top: 0,
-    },
     scrollView: {
       width: '100%',
     },
@@ -240,6 +216,26 @@ const themedStyles = (theme: Theme) =>
     bodyContainer: {
       backgroundColor: theme.colors.card,
       padding: 8,
+    },
+    urlModalContainer: {
+      maxHeight: 300,
+    },
+    urlModalText: {
+      fontSize: 12,
+    },
+    buttonContainer: {
+      gap: 8,
+      padding: 8,
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.card,
+    },
+    tabButtonContainer: {
+      paddingBottom: 4,
+      flexDirection: 'row',
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.card,
     },
   });
 
