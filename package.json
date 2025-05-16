@@ -1,6 +1,6 @@
 {
   "name": "react-native-network-logger",
-  "version": "2.0.0",
+  "version": "2.0.0-alpha.1",
   "description": "An HTTP traffic monitor for React Native with zero dependencies",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
@@ -51,6 +51,9 @@
     "release": "release-it",
     "example": "yarn workspace react-native-network-logger-example",
     "bootstrap": "yarn"
+  },
+  "dependencies": {
+    "react-native-url-polyfill": "^2.0.0"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.9",
@@ -137,5 +140,9 @@
         }
       ]
     ]
+  },
+  "volta": {
+    "node": "22.15.0",
+    "yarn": "3.6.1"
   }
 }

@@ -1,91 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import {
   View,
-  Text,
+  Share,
   StyleSheet,
   ScrollView,
-  Share,
-  TextInput,
-  Platform,
+  TouchableOpacity,
 } from 'react-native';
 import NetworkRequestInfo from '../NetworkRequestInfo';
-import { useThemedStyles, Theme } from '../theme';
+import { useThemedStyles, Theme, useTheme } from '../theme';
 import { backHandlerSet } from '../backHandler';
 import ResultItem from './ResultItem';
 import Header from './Header';
 import Button from './Button';
+import ThemedText from './ThemedText';
+import HttpHeaders from './HttpHeaders';
+import LargeText from './LargeText';
+import NLModal from './Modal';
 
 interface Props {
   request: NetworkRequestInfo;
   onClose(): void;
 }
 
-const Headers = ({
-  title = 'Headers',
-  headers,
-}: {
-  title: string;
-  headers?: object;
-}) => {
-  const styles = useThemedStyles(themedStyles);
-  return (
-    <View>
-      <Header shareContent={headers && JSON.stringify(headers, null, 2)}>
-        {title}
-      </Header>
-      <View style={styles.content}>
-        {Object.entries(headers || {}).map(([name, value]) => (
-          <View style={styles.headerContainer} key={name}>
-            <Text style={styles.headerKey}>{name}: </Text>
-            <Text style={styles.headerValue}>{value}</Text>
-          </View>
-        ))}
-      </View>
-    </View>
-  );
-};
-
-const LargeText: React.FC<{ children: string }> = ({ children }) => {
-  const styles = useThemedStyles(themedStyles);
-
-  if (Platform.OS === 'ios') {
-    /**
-     * A readonly TextInput is used because large Text blocks sometimes don't render on iOS
-     * See this issue https://github.com/facebook/react-native/issues/19453
-     * Note: Even with the fix mentioned in the comments, text with ~10,000 lines still fails to render
-     */
-    return (
-      <TextInput
-        style={[styles.content, styles.largeContent]}
-        multiline
-        editable={false}
-        value={children}
-      />
-    );
-  }
-
-  return (
-    <View style={styles.largeContent}>
-      <ScrollView nestedScrollEnabled>
-        <View>
-          <Text style={styles.content} selectable>
-            {children}
-          </Text>
-        </View>
-      </ScrollView>
-    </View>
-  );
-};
-
 const RequestDetails: React.FC<Props> = ({ request, onClose }) => {
   const [responseBody, setResponseBody] = useState('Loading...');
   const styles = useThemedStyles(themedStyles);
+  const theme = useTheme();
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const [selectedTab, setSelectedTab] = useState<
+    'response' | 'request' | 'headers'
+  >('response');
 
   useEffect(() => {
-    (async () => {
-      const body = await request.getResponseBody();
+    request.getResponseBody().then((body) => {
       setResponseBody(body);
-    })();
+    });
   }, [request]);
 
   const requestBody = request.getRequestBody(!!request.gqlOperation);
@@ -109,33 +59,138 @@ const RequestDetails: React.FC<Props> = ({ request, onClose }) => {
 
   return (
     <View style={styles.container}>
-      <ResultItem request={request} style={styles.info} />
-      <ScrollView style={styles.scrollView} nestedScrollEnabled>
-        <Headers title="Request Headers" headers={request.requestHeaders} />
-        <Header shareContent={requestBody}>Request Body</Header>
-        <LargeText>{requestBody}</LargeText>
-        <Headers title="Response Headers" headers={request.responseHeaders} />
-        <Header shareContent={responseBody}>Response Body</Header>
-        <LargeText>{responseBody}</LargeText>
-        <Header>More</Header>
-        <Button
-          onPress={() => Share.share({ message: getFullRequest() })}
-          fullWidth
-        >
-          Share full request
-        </Button>
-        <Button
+      <ResultItem
+        request={request}
+        style={styles.info}
+        numberOfLines={5}
+        onPress={() => {
+          setModalVisible(true);
+        }}
+      />
+
+      <View
+        style={{
+          paddingBottom: 4,
+          flexDirection: 'row',
+          borderBottomWidth: 1,
+          borderBottomColor: theme.colors.card,
+        }}
+      >
+        <TouchableOpacity
+          style={styles.tabHeader}
           onPress={() => Share.share({ message: request.curlRequest })}
-          fullWidth
         >
-          Share as cURL
-        </Button>
+          <ThemedText>Share cURL</ThemedText>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.tabHeader}
+          onPress={() => Share.share({ message: getFullRequest() })}
+        >
+          <ThemedText>Share full request</ThemedText>
+        </TouchableOpacity>
+      </View>
+
+      <View
+        style={{
+          paddingBottom: 4,
+          flexDirection: 'row',
+          borderBottomWidth: 1,
+          borderBottomColor: theme.colors.card,
+        }}
+      >
+        <TouchableOpacity
+          style={[
+            styles.tabHeader,
+            selectedTab === 'response' && styles.tabHeaderActive,
+          ]}
+          onPress={() => setSelectedTab('response')}
+        >
+          <ThemedText>Response</ThemedText>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.tabHeader,
+            selectedTab === 'request' && styles.tabHeaderActive,
+          ]}
+          onPress={() => setSelectedTab('request')}
+        >
+          <ThemedText>Request</ThemedText>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.tabHeader,
+            selectedTab === 'headers' && styles.tabHeaderActive,
+          ]}
+          onPress={() => setSelectedTab('headers')}
+        >
+          <ThemedText>Headers</ThemedText>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView style={styles.scrollView} nestedScrollEnabled>
+        {selectedTab === 'headers' && (
+          <>
+            <HttpHeaders
+              title="Request Headers"
+              headers={request.requestHeaders}
+            />
+
+            <HttpHeaders
+              title="Response Headers"
+              headers={request.responseHeaders}
+            />
+          </>
+        )}
+
+        {selectedTab === 'request' && (
+          <>
+            <Header shareContent={requestBody}>Request Body</Header>
+            <View style={styles.bodyContainer}>
+              <LargeText>{requestBody}</LargeText>
+            </View>
+
+            <HttpHeaders
+              title="Request Query Params"
+              headers={Object.fromEntries(
+                Array.from(request.getParsedUrl().searchParams.entries()).map(
+                  ([key, value]) => {
+                    try {
+                      const parsed = JSON.parse(value);
+                      return [
+                        key,
+                        Array.isArray(parsed) ? parsed.join(', ') : value,
+                      ];
+                    } catch {
+                      return [key, value];
+                    }
+                  }
+                )
+              )}
+            />
+          </>
+        )}
+
+        {selectedTab === 'response' && (
+          <>
+            <Header shareContent={responseBody}>Response Body</Header>
+            <View style={styles.bodyContainer}>
+              <LargeText>{responseBody}</LargeText>
+            </View>
+          </>
+        )}
       </ScrollView>
       {!backHandlerSet() && (
         <Button onPress={onClose} style={styles.close}>
           Close
         </Button>
       )}
+      <NLModal visible={modalVisible} onClose={() => setModalVisible(false)}>
+        <View style={{ maxHeight: 300 }}>
+          <ScrollView>
+            <ThemedText style={{ fontSize: 12 }}>{request.url}</ThemedText>
+          </ScrollView>
+        </View>
+      </NLModal>
     </View>
   );
 };
@@ -146,8 +201,15 @@ const themedStyles = (theme: Theme) =>
       flex: 1,
       backgroundColor: theme.colors.background,
       justifyContent: 'center',
-      alignItems: 'center',
       paddingBottom: 10,
+    },
+    tabHeader: {
+      padding: 8,
+      margin: 8,
+      backgroundColor: theme.colors.card,
+    },
+    tabHeaderActive: {
+      backgroundColor: theme.colors.statusGood,
     },
     info: {
       margin: 0,
@@ -160,7 +222,10 @@ const themedStyles = (theme: Theme) =>
     scrollView: {
       width: '100%',
     },
-    headerContainer: { flexDirection: 'row', flexWrap: 'wrap' },
+    headerContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+    },
     headerKey: { fontWeight: 'bold', color: theme.colors.text },
     headerValue: { color: theme.colors.text },
     text: {
@@ -172,8 +237,9 @@ const themedStyles = (theme: Theme) =>
       padding: 10,
       color: theme.colors.text,
     },
-    largeContent: {
-      maxHeight: 300,
+    bodyContainer: {
+      backgroundColor: theme.colors.card,
+      padding: 8,
     },
   });
 

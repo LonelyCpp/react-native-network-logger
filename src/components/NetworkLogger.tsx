@@ -117,7 +117,7 @@ const NetworkLogger: React.FC<Props> = ({
 
   return (
     <ThemeContext.Provider value={theme}>
-      <AppContextProvider>
+      <AppContextProvider allRequests={requests}>
         <View style={styles.visible}>
           {showDetails && !!request && (
             <View style={styles.visible}>

@@ -1,4 +1,5 @@
 import React, { Dispatch, useContext, useReducer } from 'react';
+import NetworkRequestInfo from 'src/NetworkRequestInfo';
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD';
 
@@ -16,6 +17,7 @@ interface AppState {
   search: string;
   filter: Filter;
   filterActive: boolean;
+  allRequests: NetworkRequestInfo[];
 }
 
 type Action =
@@ -35,6 +37,7 @@ const initialState: AppState = {
   search: '',
   filter: initialFilter,
   filterActive: false,
+  allRequests: [],
 };
 
 const AppContext = React.createContext<
@@ -77,13 +80,15 @@ export const useDispatch = () => useAppContext().dispatch;
 
 export const AppContextProvider = ({
   children,
+  allRequests,
 }: {
   children: React.ReactNode;
+  allRequests: NetworkRequestInfo[];
 }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   return (
-    <AppContext.Provider value={{ ...state, dispatch }}>
+    <AppContext.Provider value={{ ...state, dispatch, allRequests }}>
       {children}
     </AppContext.Provider>
   );

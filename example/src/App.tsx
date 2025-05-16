@@ -138,7 +138,7 @@ export default function App() {
         <View style={styles.navButton} />
       </View>
       {(unmountNetworkLogger && remountButton) || (
-        <NetworkLogger theme={theme} maxRows={10} />
+        <NetworkLogger theme={theme} maxRows={10} compact />
       )}
       <View style={styles.bottomView}>
         <Button

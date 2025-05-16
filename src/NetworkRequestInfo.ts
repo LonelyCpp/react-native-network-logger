@@ -1,6 +1,7 @@
 import BlobFileReader from 'react-native/Libraries/Blob/FileReader';
 import { Headers, NetworkRequestInfoRow, RequestMethod } from './types';
 import fromEntries from './utils/fromEntries';
+import { URL } from 'react-native-url-polyfill';
 
 export default class NetworkRequestInfo {
   id = '';
@@ -105,6 +106,10 @@ export default class NetworkRequestInfo {
     }
 
     return body;
+  }
+
+  getParsedUrl() {
+    return new URL(this.url);
   }
 
   private async parseResponseBlob() {
