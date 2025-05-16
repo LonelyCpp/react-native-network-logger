@@ -1,5 +1,5 @@
 import React from 'react';
-import { View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import ThemedText from './ThemedText';
 
 const LargeText: React.FC<{ children: string }> = ({ children }) => {
@@ -12,7 +12,7 @@ const LargeText: React.FC<{ children: string }> = ({ children }) => {
       <View>
         {chunks.map((chunk, index) => (
           <View key={index}>
-            <ThemedText style={{ fontSize: 12 }}>{chunk}</ThemedText>
+            <ThemedText style={styles.text}>{chunk}</ThemedText>
           </View>
         ))}
       </View>
@@ -25,5 +25,12 @@ const LargeText: React.FC<{ children: string }> = ({ children }) => {
     </ThemedText>
   );
 };
+
+const styles = StyleSheet.create({
+  text: {
+    fontSize: 12,
+    fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace' }),
+  },
+});
 
 export default LargeText;
