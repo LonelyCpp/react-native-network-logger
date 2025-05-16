@@ -27,24 +27,6 @@ jobs:
         id: get_tag
         run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
-      - name: Create release
-        id: create_release
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const { TAG_NAME } = process.env;
-            const response = await github.rest.repos.createRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              tag_name: TAG_NAME,
-              name: TAG_NAME,
-              body: `Alpha release of ${TAG_NAME}`,
-              draft: false,
-              prerelease: true
-            });
-            return response.data.id;
-          result-encoding: string
-
       - name: Get package info
         id: package
         run: |
@@ -55,12 +37,13 @@ jobs:
       - name: Pack yarn package
         run: yarn pack --filename=${{ env.TARBALL }}        
 
-      - name: Upload release asset
-        uses: actions/upload-release-asset@v1
+      - name: Create release
+        id: create_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.data.upload_url }}
-          asset_path: ./${{ env.TARBALL }}
-          asset_name: ${{ env.TARBALL }}
-          asset_content_type: application/gzip
+          tag: ${{ github.ref_name }}
+        run: |
+          gh release create "$tag" "./${{ env.TARBALL }}" \
+              --repo="$GITHUB_REPOSITORY" \
+              --title="${tag#v}" \
+              --generate-notes
