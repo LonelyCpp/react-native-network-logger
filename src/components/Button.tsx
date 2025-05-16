@@ -51,6 +51,7 @@ const themedStyles = (theme: Theme) =>
       alignSelf: 'flex-start',
       borderRadius: 8,
       backgroundColor: theme.colors.card,
+      overflow: 'hidden',
     },
     fullWidth: {
       alignSelf: 'center',

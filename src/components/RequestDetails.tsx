@@ -74,10 +74,20 @@ const RequestDetails: React.FC<Props> = ({ request, onClose }) => {
       <View style={styles.buttonContainer}>
         {!backHandlerSet() && <Button onPress={onClose}>Close</Button>}
 
-        <Button onPress={() => Share.share({ message: request.curlRequest })}>
+        <Button
+          onPress={() =>
+            Share.share({
+              message: `\`\`\`\n${request.curlRequest}\n\`\`\``,
+            })
+          }
+        >
           Share cURL
         </Button>
-        <Button onPress={() => Share.share({ message: getFullRequest() })}>
+        <Button
+          onPress={() =>
+            Share.share({ message: `\`\`\`\n${getFullRequest()}\n\`\`\`` })
+          }
+        >
           Share full request
         </Button>
       </View>
