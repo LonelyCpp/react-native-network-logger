@@ -1,6 +1,6 @@
 {
   "name": "react-native-network-logger",
-  "version": "2.0.0-alpha.9",
+  "version": "2.0.1-alpha.1",
   "description": "An HTTP traffic monitor for React Native with zero dependencies",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
