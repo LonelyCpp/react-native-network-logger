@@ -22,10 +22,10 @@ const NLModal = ({ visible, onClose, children, title }: Props) => {
 
   return (
     <Modal
-      visible={visible}
-      animationType="fade"
       transparent
+      visible={visible}
       onDismiss={onClose}
+      animationType="fade"
       onRequestClose={onClose}
     >
       <View style={styles.modalRoot}>

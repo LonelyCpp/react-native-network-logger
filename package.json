@@ -1,6 +1,6 @@
 {
   "name": "react-native-network-logger",
-  "version": "2.0.1",
+  "version": "2.0.1-alpha.1",
   "description": "An HTTP traffic monitor for React Native with zero dependencies",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
@@ -15,7 +15,7 @@
   "source": "src/index.tsx",
   "repository": {
     "type": "git",
-    "url": "https://github.com/alexbrazier/react-native-network-logger.git"
+    "url": "https://github.com/LonelyCpp/react-native-network-logger.git"
   },
   "keywords": [
     "react",
@@ -52,6 +52,9 @@
     "example": "yarn workspace react-native-network-logger-example",
     "bootstrap": "yarn"
   },
+  "dependencies": {
+    "react-native-url-polyfill": "^2.0.0"
+  },
   "devDependencies": {
     "@eslint/compat": "^1.2.9",
     "@eslint/eslintrc": "^3.3.1",
@@ -81,9 +84,7 @@
     "react": "*",
     "react-native": "*"
   },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
-  },
+  "private": true,
   "jest": {
     "preset": "react-native",
     "modulePathIgnorePatterns": [
@@ -137,5 +138,9 @@
         }
       ]
     ]
+  },
+  "volta": {
+    "node": "22.15.0",
+    "yarn": "3.6.1"
   }
 }

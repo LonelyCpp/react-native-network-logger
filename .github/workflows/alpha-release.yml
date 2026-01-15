@@ -1,0 +1,52 @@
+name: Alpha Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Create Alpha Release
+    runs-on: ubuntu-latest
+    if: contains(github.ref, '-alpha')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+
+      - name: Setup Volta
+        uses: volta-cli/action@v4
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build library
+        run: yarn prepare
+
+      - name: Extract tag name
+        id: get_tag
+        run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Get package info
+        id: package
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name.replace('@', '').replace('/', '-')")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          echo "TARBALL=${PACKAGE_NAME}-v${PACKAGE_VERSION}.tgz" >> $GITHUB_ENV
+
+      - name: Pack yarn package
+        run: yarn pack --filename=${{ env.TARBALL }}        
+
+      - name: Create release
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+        run: |
+          gh release create "$tag" "./${{ env.TARBALL }}" \
+              --repo="$GITHUB_REPOSITORY" \
+              --title="${tag#v}" \
+              --generate-notes
