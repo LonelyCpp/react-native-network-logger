@@ -1,5 +1,5 @@
 {
-  "name": "react-native-network-logger",
+  "name": "@lonelycpp/react-native-network-logger",
   "version": "3.0.0-alpha.2",
   "description": "An HTTP traffic monitor for React Native with zero dependencies",
   "main": "./lib/module/index.js",
@@ -85,7 +85,10 @@
     "react": "*",
     "react-native": "*"
   },
-  "private": true,
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
   "jest": {
     "preset": "@react-native/jest-preset",
     "modulePathIgnorePatterns": [
