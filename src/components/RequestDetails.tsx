@@ -204,6 +204,7 @@ const themedStyles = (theme: Theme) =>
     },
     info: {
       margin: 0,
+      maxHeight: 150,
     },
     scrollView: {
       width: '100%',
@@ -229,6 +230,7 @@ const themedStyles = (theme: Theme) =>
     },
     urlModalContainer: {
       maxHeight: 300,
+      flex: 1,
     },
     urlModalText: {
       fontSize: 12,
