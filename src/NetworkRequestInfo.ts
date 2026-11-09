@@ -1,6 +1,7 @@
 import BlobFileReader from 'react-native/Libraries/Blob/FileReader';
 import { Headers, NetworkRequestInfoRow, RequestMethod } from './types';
 import fromEntries from './utils/fromEntries';
+import { URL } from 'react-native-url-polyfill';
 
 export default class NetworkRequestInfo {
   id = '';
@@ -107,10 +108,16 @@ export default class NetworkRequestInfo {
     return body;
   }
 
-  private async parseResponseBlob() {
-    const blobReader = new BlobFileReader();
-    blobReader.readAsText(this.response);
+  getParsedUrl() {
+    return new URL(this.url);
+  }
 
+  private async parseResponseBlob() {
+    if (this.response === null || this.response === undefined) {
+      return '';
+    }
+
+    const blobReader = new BlobFileReader();
     return await new Promise<string>((resolve, reject) => {
       const handleError = () => reject(blobReader.error);
 
@@ -119,14 +126,32 @@ export default class NetworkRequestInfo {
       });
       blobReader.addEventListener('error', handleError);
       blobReader.addEventListener('abort', handleError);
+
+      try {
+        blobReader.readAsText(this.response);
+      } catch (error) {
+        reject(error);
+      }
     });
   }
 
   async getResponseBody() {
-    const body = await (this.responseType !== 'blob'
-      ? this.response
-      : this.parseResponseBlob());
+    if (this.endTime === 0 && this.status < 0) {
+      return 'Pending response...';
+    }
 
-    return this.stringifyFormat(body);
+    try {
+      const body = await (this.responseType !== 'blob'
+        ? this.response
+        : this.parseResponseBlob());
+
+      if (body === '' || body === null || body === undefined) {
+        return '';
+      }
+
+      return this.stringifyFormat(body);
+    } catch {
+      return '[Unable to load response body]';
+    }
   }
 }

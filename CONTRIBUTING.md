@@ -91,3 +91,27 @@ When you're sending a pull request:
 - Review the documentation to make sure it looks good.
 - Follow the pull request template when opening a pull request.
 - For pull requests that change the API or implementation, discuss with maintainers first by opening an issue.
+
+### Publishing this fork to GitHub Packages
+
+This fork is published as `@lonelycpp/react-native-network-logger` on GitHub Packages (see `publishConfig` in `package.json`).
+
+1. Make sure the version in `package.json` has not been published before. GitHub Packages rejects republishing a version. For alphas, `./push-alpha.sh` bumps the alpha number, commits, pushes and tags; otherwise edit `version` by hand and commit.
+2. Create a **classic** personal access token with the `write:packages` scope (fine-grained tokens don't work with GitHub Packages) and export it as `GH_NPM_TOKEN_WRITE`.
+3. Build and publish from the repo root:
+
+   ```sh
+   yarn prepare
+   echo "//npm.pkg.github.com/:_authToken=$GH_NPM_TOKEN_WRITE" > /tmp/npmrc-gh && \
+     NPM_CONFIG_USERCONFIG=/tmp/npmrc-gh npm publish --tag alpha; rm -f /tmp/npmrc-gh
+   ```
+
+   Use `--tag alpha` for pre-releases. Drop it for a stable release so it becomes `latest`.
+
+Consumers need a token with `read:packages` (even though the package is public) and this in their `.npmrc`:
+
+```
+@lonelycpp:registry=https://npm.pkg.github.com
+```
+
+Then install with `yarn add @lonelycpp/react-native-network-logger@alpha`.
